@@ -1,10 +1,8 @@
-import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
 import express from 'express';
 import morgan from 'morgan';
-import { prismaClient } from './lib/db';
-
+import { createApolloGraphqlServer } from './graphql';
 async function init() {
     const app = express();
     app.use(express.json());
@@ -21,62 +19,7 @@ async function init() {
 
     const PORT = 8000; // Default to 4000 if PORT is not set
 
-    // Create graphql server
-    const gqlServer = new ApolloServer({
-        typeDefs: `
-            type Query {
-                hello: String
-                say(name: String): String
-            }
-
-            type Mutation {
-                createUser(firstName: String!, lastName: String!, email:String!, password: String!): Boolean
-            }
-        `, // Schema as a string
-        resolvers: {
-            Query: {
-                hello: () => `Hey there, I am a graphql Server`,
-                say: (_, { name }: { name: string }) =>
-                    `Hey ${name}, How are you?`,
-            },
-
-            Mutation: {
-                createUser: async (
-                    _,
-                    {
-                      firstName,
-                      lastName,
-                      email,
-                      password,
-                    }: {
-                      firstName: string;
-                      lastName: string;
-                      email: string;
-                      password: string;
-                    },
-                  ) => {
-                    try {
-                      await prismaClient.user.create({
-                        data: {
-                          firstName,
-                          lastName,
-                          email, // Include the email field here
-                          password,
-                          salt: "random_salt",
-                        },
-                      });
-                      return true;
-                    } catch (error) {
-                      console.error("Error creating user:", error);
-                      return false; // You might want to return a specific error message instead
-                    }
-                  },
-            },
-        }, // Functions that will execute
-    });
-
-    await gqlServer.start();
-
+    const gqlServer = await createApolloGraphqlServer();
     app.use('/graphql', expressMiddleware(gqlServer));
 
     app.get('/', (req, res) => {

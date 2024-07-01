@@ -1,31 +1,32 @@
 import { ApolloServer } from '@apollo/server';
-import { prismaClient } from '../lib/db';
-import { user } from './user/index';
+import { user } from './user/user.index';
 
 export async function createApolloGraphqlServer() {
-    // Create graphql server
-    const gqlServer = new ApolloServer({
-        typeDefs: `
-            type Query {
-                hello: String
-            }
+    try {
+        // Create graphql server
+        const gqlServer = new ApolloServer({
+            typeDefs: `
+                type Query {
+                    hello: String
+                }
 
-            type Mutation {
-                ${user.mutations}
-            }
-        `, // Schema as a string
-        resolvers: {
-            Query: {
-                ...user.resolvers.queries,
+                type Mutation {
+                    ${user.mutations}
+                }
+            `,
+            resolvers: {
+                Query: {
+                    ...user.resolvers.queries,
+                },
+                Mutation: {
+                    ...user.resolvers.mutations,
+                },
             },
-
-            Mutation: {
-                ...user.resolvers.mutations,
-            },
-        }, // Functions that will execute
-    });
-
-    await gqlServer.start();
-
-    return gqlServer;
+        });
+        await gqlServer.start();
+        return gqlServer;
+    } catch (error) {
+        console.error("Error starting GraphQL server:", error);
+        throw error;
+    }
 }

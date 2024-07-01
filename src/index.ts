@@ -1,12 +1,11 @@
 import { expressMiddleware } from '@apollo/server/express4';
 import cors from 'cors';
 import express from 'express';
-import morgan from 'morgan';
 import { createApolloGraphqlServer } from './graphql';
+
 async function init() {
     const app = express();
     app.use(express.json());
-    app.use(morgan('common'));
 
     // CORS Configuration
     app.use(
@@ -17,8 +16,7 @@ async function init() {
         })
     );
 
-    const PORT = 8000; // Default to 4000 if PORT is not set
-
+    const PORT = 8000; // Default to 8000 if PORT is not set
     const gqlServer = await createApolloGraphqlServer();
     app.use('/graphql', expressMiddleware(gqlServer));
 

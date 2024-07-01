@@ -7,7 +7,7 @@ export async function createApolloGraphqlServer() {
         const gqlServer = new ApolloServer({
             typeDefs: `
                 type Query {
-                    hello: String
+                    ${user.queries}
                 }
 
                 type Mutation {
@@ -26,7 +26,7 @@ export async function createApolloGraphqlServer() {
         await gqlServer.start();
         return gqlServer;
     } catch (error) {
-        console.error("Error starting GraphQL server:", error);
+        console.error('Error starting GraphQL server:', error);
         throw error;
     }
 }
